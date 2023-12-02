@@ -5,7 +5,12 @@ def main():
     print("Logs from your program will appear here!")
 
     server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    server_socket.accept()  # wait for client
+    conn, _ = server_socket.accept()  # wait for client
+
+    message = conn.recv(1024).decode()
+
+    if message == "*1\r\n$4\r\nping\r\n":
+        conn.sendAll("PONG\r\n").encode()
 
 
 if __name__ == "__main__":
