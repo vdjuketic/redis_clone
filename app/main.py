@@ -8,9 +8,10 @@ def main():
     conn, _ = server_socket.accept()  # wait for client
 
     message = conn.recv(1024).decode()
+    print(f"received message: {message}")
 
     if message == "*1\r\n$4\r\nping\r\n":
-        conn.sendAll("PONG\r\n").encode()
+        conn.sendall("PONG\r\n".encode())
 
 
 if __name__ == "__main__":
