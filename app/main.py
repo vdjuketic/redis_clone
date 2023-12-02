@@ -1,18 +1,9 @@
 import socket
+from .event_loop import run_server
 
 
 def main():
-    print("Logs from your program will appear here!")
-
-    server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    conn, _ = server_socket.accept()  # wait for client
-
-    while True:
-        message = conn.recv(1024).decode()
-        print(f"received message: {message}")
-
-        if message == "*1\r\n$4\r\nping\r\n":
-            conn.sendall("+PONG\r\n".encode())
+    run_server([socket.AF_INET, socket.SOCK_STREAM], ("localhost", 6379))
 
 
 if __name__ == "__main__":
