@@ -12,7 +12,7 @@ class Storage:
         # ttl in seconds
         self.storage[key] = (
             value,
-            int(datetime.now() + timedelta(milliseconds=ttl)) * 1000,
+            int((datetime.now() + timedelta(milliseconds=ttl)).timestamp()) * 1000,
         )
 
     def get(self, key):
