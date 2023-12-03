@@ -3,7 +3,9 @@ from contextlib import contextmanager
 import socket
 import select
 
-storage = {}
+from app.storage import Storage
+
+storage = Storage()
 
 
 @contextmanager
@@ -65,20 +67,27 @@ def receive_request(fileno, requests, connections, responses, epoll):
 
         if split[2].lower() == b"ping":
             responses[fileno] = b"+PONG\r\n"
-            requests[fileno] = b""
+
         elif split[2].lower() == b"echo":
             responses[fileno] = b"+" + split[4] + b"\r\n"
-            requests[fileno] = b""
+
         elif split[2].lower() == b"set":
-            storage[split[4]] = split[6]
-            responses[fileno] = b"+OK\r\n"
-            requests[fileno] = b""
+            if len(split) == 6:
+                storage.set(split[4], split[6])
+                responses[fileno] = b"+OK\r\n"
+            else:
+                storage.set_with_ttl(split[4], split[6], int(split[10]))
+                responses[fileno] = b"+OK\r\n"
+
         elif split[2].lower() == b"get":
-            responses[fileno] = b"+" + storage[split[4]] + b"\r\n"
-            requests[fileno] = b""
+            value = storage.get(split[4])
+            if value:
+                responses[fileno] = b"+" + value + b"\r\n"
+            else:
+                responses[fileno] = b"-1\r\n"
         else:
             responses[fileno] = b"+ERR\r\n"
-            requests[fileno] = b""
+        requests[fileno] = b""
 
 
 def send_response(fileno, connections, responses, epoll):
