@@ -1,4 +1,4 @@
-import time
+from datetime import datetime, timedelta
 
 
 class Storage:
@@ -10,14 +10,14 @@ class Storage:
 
     def set_with_ttl(self, key, value, ttl):
         # ttl in seconds
-        self.storage[key] = (value, int(time.time() + (ttl / 1000)))
+        self.storage[key] = (value, datetime.now() + timedelta(milliseconds=ttl))
 
     def get(self, key):
         print(self.storage)
         if key in self.storage:
             entry = self.storage[key]
             if entry[1] != -1:
-                timestamp = int(time.time())
+                timestamp = datetime.now()
                 if entry[1] < timestamp:
                     del self.storage[key]
                 else:
