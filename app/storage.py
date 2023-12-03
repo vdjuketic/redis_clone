@@ -12,7 +12,9 @@ class Storage:
         # ttl in seconds
         self.storage[key] = (
             value,
-            int((datetime.now() + timedelta(milliseconds=ttl)).timestamp()) * 1000,
+            (datetime.now().utcnow() + timedelta(milliseconds=ttl)).isoformat(
+                sep=" ", timespec="milliseconds"
+            ),
         )
 
     def get(self, key):
@@ -20,8 +22,8 @@ class Storage:
         if key in self.storage:
             entry = self.storage[key]
             if entry[1] != -1:
-                timestamp = datetime.now()
-                if datetime.fromtimestamp(entry[1] / 1000.0) < timestamp:
+                timestamp = datetime.now().utcnow()
+                if datetime.fromisoformat(entry[1]) < timestamp:
                     del self.storage[key]
                 else:
                     return entry[0]
