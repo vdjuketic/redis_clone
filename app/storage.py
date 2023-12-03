@@ -10,7 +10,10 @@ class Storage:
 
     def set_with_ttl(self, key, value, ttl):
         # ttl in seconds
-        self.storage[key] = (value, datetime.now() + timedelta(milliseconds=ttl))
+        self.storage[key] = (
+            value,
+            int(datetime.now() + timedelta(milliseconds=ttl)) * 1000,
+        )
 
     def get(self, key):
         print(self.storage)
@@ -18,7 +21,7 @@ class Storage:
             entry = self.storage[key]
             if entry[1] != -1:
                 timestamp = datetime.now()
-                if entry[1] < timestamp:
+                if datetime.fromtimestamp(entry[1] / 1000.0) < timestamp:
                     del self.storage[key]
                 else:
                     return entry[0]
