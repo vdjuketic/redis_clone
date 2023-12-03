@@ -94,6 +94,7 @@ def send_response(fileno, connections, responses, epoll):
     """Send a response to a client."""
     byteswritten = connections[fileno].send(responses[fileno])
     responses[fileno] = responses[fileno][byteswritten:]
+    print(f"sending {responses[fileno]}")
     epoll.modify(fileno, select.EPOLLIN)
 
 
