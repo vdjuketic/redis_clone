@@ -36,8 +36,8 @@ def init_connection(server, connections, requests, responses, epoll):
     fd = connection.fileno()
     epoll.register(fd, select.EPOLLIN)
     connections[fd] = connection
-    requests[fd] = ""
-    responses[fd] = ""
+    requests[fd] = b""
+    responses[fd] = b""
 
 
 def receive_request(fileno, requests, connections, responses, epoll):
@@ -45,7 +45,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
     Handle client closing the connection.
     """
     print(requests)
-    requests[fileno] += connections[fileno].recv(1024).decode("utf-8")
+    requests[fileno] += connections[fileno].recv(1024)
 
     if requests[fileno] == "quit\n" or requests[fileno] == "":
         print("[{:02d}] exit or hung up".format(fileno))
@@ -54,28 +54,28 @@ def receive_request(fileno, requests, connections, responses, epoll):
         del connections[fileno], requests[fileno], responses[fileno]
         return
 
-    elif "\n" in requests[fileno]:
+    elif b"\n" in requests[fileno]:
         epoll.modify(fileno, select.EPOLLOUT)
         msg = requests[fileno][:-1]
         print("[{:02d}] says: {}".format(fileno, msg))
 
-        split = msg.split("\r\n")
+        split = msg.split(b"\r\n")
         print(split)
 
-        if split[2].lower() == "ping":
-            responses[fileno] = "+PONG\r\n"
-            requests[fileno] = ""
-        elif split[2].lower() == "echo":
+        if split[2].lower() == b"ping":
+            responses[fileno] = b"+PONG\r\n"
+            requests[fileno] = b""
+        elif split[2].lower() == b"echo":
             responses[fileno] = split[4]
-            requests[fileno] = ""
+            requests[fileno] = b""
         else:
-            responses[fileno] = "+ERR\r\n"
-            requests[fileno] = ""
+            responses[fileno] = b"+ERR\r\n"
+            requests[fileno] = b""
 
 
 def send_response(fileno, connections, responses, epoll):
     """Send a response to a client."""
-    byteswritten = connections[fileno].send(responses[fileno].encode())
+    byteswritten = connections[fileno].send(responses[fileno])
     responses[fileno] = responses[fileno][byteswritten:]
     epoll.modify(fileno, select.EPOLLIN)
 
