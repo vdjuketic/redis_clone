@@ -46,7 +46,6 @@ def receive_request(fileno, requests, connections, responses, epoll):
     """Receive a request and add a response to send.
     Handle client closing the connection.
     """
-    print(requests)
     requests[fileno] += connections[fileno].recv(1024)
 
     if requests[fileno] == "quit\n" or requests[fileno] == "":
@@ -71,11 +70,11 @@ def receive_request(fileno, requests, connections, responses, epoll):
             responses[fileno] = b"+" + split[4] + b"\r\n"
             requests[fileno] = b""
         elif split[2].lower() == b"set":
-            storage[split[3]] = split[4]
+            storage[split[4]] = split[5]
             responses[fileno] = b"+OK\r\n"
             requests[fileno] = b""
         elif split[2].lower() == b"get":
-            responses[fileno] = b"+" + storage[split[3]] + b"\r\n"
+            responses[fileno] = b"+" + storage[split[4]] + b"\r\n"
             requests[fileno] = b""
         else:
             responses[fileno] = b"+ERR\r\n"
