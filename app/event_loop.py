@@ -44,6 +44,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
     """Receive a request and add a response to send.
     Handle client closing the connection.
     """
+    print(requests)
     requests[fileno] += connections[fileno].recv(1024).decode("utf-8")
 
     if requests[fileno] == "quit\n" or requests[fileno] == "":
@@ -53,7 +54,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
         del connections[fileno], requests[fileno], responses[fileno]
         return
 
-    else:
+    elif "\n" in requests[fileno]:
         epoll.modify(fileno, select.EPOLLOUT)
         msg = requests[fileno][:-1]
         print("[{:02d}] says: {}".format(fileno, msg))
