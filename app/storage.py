@@ -13,6 +13,7 @@ class Storage:
         self.storage[key] = (value, int(time.time() + (ttl / 1000)))
 
     def get(self, key):
+        print(self.storage)
         if key in self.storage:
             entry = self.storage[key]
             if entry[1] != -1:
