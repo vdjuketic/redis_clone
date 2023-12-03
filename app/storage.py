@@ -22,8 +22,10 @@ class Storage:
         if key in self.storage:
             entry = self.storage[key]
             if entry[1] != -1:
-                timestamp = datetime.now().utcnow()
-                if datetime.fromisoformat(entry[1]) < timestamp:
+                current = datetime.now().utcnow()
+                saved = datetime.fromisoformat(entry[1])
+                print(current, saved)
+                if saved < current:
                     del self.storage[key]
                 else:
                     return entry[0]
