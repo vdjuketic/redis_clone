@@ -58,8 +58,15 @@ def receive_request(fileno, requests, connections, responses, epoll):
         epoll.modify(fileno, select.EPOLLOUT)
         msg = requests[fileno][:-1]
         print("[{:02d}] says: {}".format(fileno, msg))
-        if msg:
+
+        split = msg.split("\\r\\n")
+        print(split)
+
+        if split[2].lower() == "ping":
             responses[fileno] = "+PONG\r\n"
+            requests[fileno] = ""
+        elif split[2].lower() == "echo":
+            responses[fileno] = split[4]
             requests[fileno] = ""
         else:
             responses[fileno] = "+ERR\r\n"
