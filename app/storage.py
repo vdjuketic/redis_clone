@@ -10,7 +10,7 @@ class Storage:
 
     def set_with_ttl(self, key, value, ttl):
         # ttl in seconds
-        self.storage[key] = (value, int(time.time() + ttl / 1000))
+        self.storage[key] = (value, int(time.time() + (ttl / 1000)))
 
     def get(self, key):
         if key in self.storage:
