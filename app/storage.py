@@ -1,4 +1,4 @@
-import datetime
+import time
 
 
 class Storage:
@@ -9,11 +9,8 @@ class Storage:
         self.storage[key] = (value, -1)
 
     def set_with_ttl(self, key, value, ttl):
-        # ttl in miliseconds
-        self.storage[key] = (
-            value,
-            int(datetime.datetime.now() + datetime.timedelta(milliseconds=ttl)),
-        )
+        # ttl in seconds
+        self.storage[key] = (value, int(time.time() + ttl / 1000))
 
     def get(self, key):
         if key in self.storage:
