@@ -84,9 +84,10 @@ def receive_request(fileno, requests, connections, responses, epoll):
             if value:
                 responses[fileno] = b"+" + value + b"\r\n"
             else:
-                responses[fileno] = b"-1\r\n"
+                responses[fileno] = b"+-1\r\n"
         else:
             responses[fileno] = b"+ERR\r\n"
+        print(responses)
         requests[fileno] = b""
 
 
@@ -94,7 +95,6 @@ def send_response(fileno, connections, responses, epoll):
     """Send a response to a client."""
     byteswritten = connections[fileno].send(responses[fileno])
     responses[fileno] = responses[fileno][byteswritten:]
-    print(f"sending {responses[fileno]}")
     epoll.modify(fileno, select.EPOLLIN)
 
 
