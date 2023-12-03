@@ -72,7 +72,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
             responses[fileno] = b"+" + split[4] + b"\r\n"
 
         elif split[2].lower() == b"set":
-            if len(split) == 7:
+            if len(split) == 6:
                 storage.set(split[4], split[6])
                 responses[fileno] = b"+OK\r\n"
             else:
