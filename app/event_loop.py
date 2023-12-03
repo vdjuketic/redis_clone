@@ -66,7 +66,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
             responses[fileno] = b"+PONG\r\n"
             requests[fileno] = b""
         elif split[2].lower() == b"echo":
-            responses[fileno] = split[4]
+            responses[fileno] = b"+" + split[4] + "\r\n"
             requests[fileno] = b""
         else:
             responses[fileno] = b"+ERR\r\n"
