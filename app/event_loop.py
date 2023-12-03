@@ -84,7 +84,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
             if value:
                 responses[fileno] = b"+" + value + b"\r\n"
             else:
-                responses[fileno] = b"\r\n"
+                responses[fileno] = b"_\r\n"
         else:
             responses[fileno] = b"+ERR\r\n"
         print(responses)
