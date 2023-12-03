@@ -3,6 +3,8 @@ from contextlib import contextmanager
 import socket
 import select
 
+storage = {}
+
 
 @contextmanager
 def socketcontext(*args, **kwargs):
@@ -67,6 +69,13 @@ def receive_request(fileno, requests, connections, responses, epoll):
             requests[fileno] = b""
         elif split[2].lower() == b"echo":
             responses[fileno] = b"+" + split[4] + b"\r\n"
+            requests[fileno] = b""
+        elif split[2].lower() == b"set":
+            storage[split[3]] = split[4]
+            responses[fileno] = b"+OK\r\n"
+            requests[fileno] = b""
+        elif split[2].lower() == b"get":
+            responses[fileno] = b"+" + storage[split[3]] + b"\r\n"
             requests[fileno] = b""
         else:
             responses[fileno] = b"+ERR\r\n"
