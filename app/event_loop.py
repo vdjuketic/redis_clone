@@ -59,7 +59,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
 
     elif requests[fileno].startswith(b"*") and requests[fileno].endswith(b"\n"):
         epoll.modify(fileno, select.EPOLLOUT)
-        msg = requests[fileno]
+        msg = requests[fileno][:-1]
         print("[{:02d}] says: {}".format(fileno, msg))
 
         split = msg.split(b"\r\n")
@@ -72,7 +72,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
             responses[fileno] = b"+" + split[4] + b"\r\n"
 
         elif split[2].lower() == b"set":
-            if len(split) == 6:
+            if len(split) == 7:
                 storage.set(split[4], split[6])
                 responses[fileno] = b"+OK\r\n"
             else:
