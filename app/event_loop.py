@@ -70,7 +70,7 @@ def receive_request(fileno, requests, connections, responses, epoll):
             responses[fileno] = b"+" + split[4] + b"\r\n"
             requests[fileno] = b""
         elif split[2].lower() == b"set":
-            storage[split[4]] = split[5]
+            storage[split[4]] = split[6]
             responses[fileno] = b"+OK\r\n"
             requests[fileno] = b""
         elif split[2].lower() == b"get":
