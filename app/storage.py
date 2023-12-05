@@ -9,7 +9,6 @@ class Storage:
         self.storage[key] = (value, -1)
 
     def set_with_ttl(self, key, value, ttl):
-        # ttl in seconds
         self.storage[key] = (
             value,
             (datetime.now().utcnow() + timedelta(milliseconds=ttl)).isoformat(

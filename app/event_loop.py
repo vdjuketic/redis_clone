@@ -3,9 +3,7 @@ from contextlib import contextmanager
 import socket
 import select
 
-from app.storage import Storage
-
-storage = Storage()
+from app.command_handler import handle_set_command, handle_get_command
 
 
 @contextmanager
@@ -72,19 +70,15 @@ def receive_request(fileno, requests, connections, responses, epoll):
             responses[fileno] = b"+" + split[4] + b"\r\n"
 
         elif split[2].lower() == b"set":
-            if len(split) == 8:
-                storage.set(split[4], split[6])
-                responses[fileno] = b"+OK\r\n"
+            if len(split) > 8:
+                responses[fileno] = handle_set_command(
+                    split[4], split[6], int(split[10])
+                )
             else:
-                storage.set_with_ttl(split[4], split[6], int(split[10]))
-                responses[fileno] = b"+OK\r\n"
+                responses[fileno] = handle_set_command(split[4], split[6])
 
         elif split[2].lower() == b"get":
-            value = storage.get(split[4])
-            if value:
-                responses[fileno] = b"+" + value + b"\r\n"
-            else:
-                responses[fileno] = b"$-1\r\n"
+            responses[fileno] = handle_get_command(split[4])
         else:
             responses[fileno] = b"+ERR\r\n"
         print(responses)
