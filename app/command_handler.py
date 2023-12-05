@@ -3,7 +3,7 @@ from app.storage import Storage
 storage = Storage()
 
 
-def handle_set_command(key, value, ttl):
+def handle_set_command(key, value, ttl=None):
     if ttl:
         storage.set_with_ttl(key, value, ttl)
         return b"+OK\r\n"
