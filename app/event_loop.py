@@ -3,7 +3,11 @@ from contextlib import contextmanager
 import socket
 import select
 
-from app.command_handler import handle_set_command, handle_get_command
+from app.command_handler import (
+    handle_set_command,
+    handle_get_command,
+    handle_config_command,
+)
 
 
 @contextmanager
@@ -79,6 +83,9 @@ def receive_request(fileno, requests, connections, responses, epoll):
 
         elif split[2].lower() == b"get":
             responses[fileno] = handle_get_command(split[4])
+
+        elif split[2].lower() == b"config":
+            responses[fileno] = handle_config_command(split[4], split[6])
         else:
             responses[fileno] = b"+ERR\r\n"
         print(responses)
