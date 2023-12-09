@@ -7,6 +7,7 @@ from app.command_handler import (
     handle_set_command,
     handle_get_command,
     handle_config_command,
+    handle_keys_command,
 )
 
 
@@ -67,27 +68,33 @@ def receive_request(fileno, requests, connections, responses, epoll):
         split = msg.split(b"\r\n")
         print(split)
 
-        if split[2].lower() == b"ping":
-            responses[fileno] = b"+PONG\r\n"
+        match split[2].lower():
+            case b"ping":
+                responses[fileno] = b"+PONG\r\n"
 
-        elif split[2].lower() == b"echo":
-            responses[fileno] = b"+" + split[4] + b"\r\n"
+            case b"echo":
+                responses[fileno] = b"+" + split[4] + b"\r\n"
 
-        elif split[2].lower() == b"set":
-            if len(split) > 8:
-                responses[fileno] = handle_set_command(
-                    split[4], split[6], int(split[10])
-                )
-            else:
-                responses[fileno] = handle_set_command(split[4], split[6])
+            case b"set":
+                if len(split) > 8:
+                    responses[fileno] = handle_set_command(
+                        split[4], split[6], int(split[10])
+                    )
+                else:
+                    responses[fileno] = handle_set_command(split[4], split[6])
 
-        elif split[2].lower() == b"get":
-            responses[fileno] = handle_get_command(split[4])
+            case b"get":
+                responses[fileno] = handle_get_command(split[4])
 
-        elif split[2].lower() == b"config":
-            responses[fileno] = handle_config_command(split[4], split[6])
-        else:
-            responses[fileno] = b"+ERR\r\n"
+            case b"config":
+                responses[fileno] = handle_config_command(split[4], split[6])
+
+            case b"keys":
+                responses[fileno] = handle_keys_command()
+
+            case _:
+                responses[fileno] = b"+ERR\r\n"
+
         print(responses)
         requests[fileno] = b""
 

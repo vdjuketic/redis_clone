@@ -17,13 +17,11 @@ class Storage:
         )
 
     def get(self, key):
-        print(self.storage)
         if key in self.storage:
             entry = self.storage[key]
             if entry[1] != -1:
                 current = datetime.now().utcnow()
                 saved = datetime.fromisoformat(entry[1])
-                print(current, saved)
                 if saved < current:
                     del self.storage[key]
                 else:
