@@ -8,7 +8,6 @@ def encode_string(str):
 
 def encode_list(list):
     encoded = f"{len(list)}\r\n"
-    print(list)
     for string in list:
         encoded += f"${len(string)}\r\n{string}\r\n"
 
