@@ -76,39 +76,42 @@ def read_file():
     if not db_file.is_file():
         return None
 
-    with open(db_file, "rb") as file:
-        assert file.read(5) == b"REDIS"
-        version = file.read(4)
+    try:
+        with open(db_file, "rb") as file:
+            assert file.read(5) == b"REDIS"
+            version = file.read(4)
 
-        current_db = ""
+            current_db = ""
 
-        while True:
-            op = read_unsigned_char(file)
-            match op:
-                case OP_CODE.AUX:
-                    key = read_string(file)
-                    val = read_string(file)
-                case OP_CODE.SELECTDB:
-                    current_db = read_unsigned_char(file)
-                    databases[current_db] = {}
-                case OP_CODE.RESIZEDB:
-                    hash_table_len = read_unsigned_char(file)
-                    expire_table_len = read_unsigned_char(file)
-                case OP_CODE.EXPIRETIME:
-                    raise NotImplementedError()
-                case OP_CODE.EXPIRETIMEMS:
-                    raise NotImplementedError()
-                case OP_CODE.EOF:
-                    # cheksum
-                    checksum = read_unsigned_long(file)
-                    break
-                case value_type:
-                    key, value = read_key_value(value_type, file)
-                    databases[current_db][key] = value
+            while True:
+                op = read_unsigned_char(file)
+                match op:
+                    case OP_CODE.AUX:
+                        key = read_string(file)
+                        val = read_string(file)
+                    case OP_CODE.SELECTDB:
+                        current_db = read_unsigned_char(file)
+                        databases[current_db] = {}
+                    case OP_CODE.RESIZEDB:
+                        hash_table_len = read_unsigned_char(file)
+                        expire_table_len = read_unsigned_char(file)
+                    case OP_CODE.EXPIRETIME:
+                        raise NotImplementedError()
+                    case OP_CODE.EXPIRETIMEMS:
+                        raise NotImplementedError()
+                    case OP_CODE.EOF:
+                        # cheksum
+                        checksum = read_unsigned_long(file)
+                        break
+                    case value_type:
+                        key, value = read_key_value(value_type, file)
+                        databases[current_db][key] = value
 
-    print(f"loaded DBs from {dbfilename}")
-    print(databases)
-    return databases
+        print(f"loaded DBs from {dbfilename}")
+        print(databases)
+        return databases
+    except FileNotFoundError as e:
+        raise e
 
 
 def read_unsigned_char(file):
