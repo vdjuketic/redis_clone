@@ -2,7 +2,7 @@ import struct
 from enum import Enum
 from pathlib import Path
 
-from app.util.decoder import read_length_encoding, read_string
+from app.util.decoder import read_length_encoding, read_string, unsigned_int
 from app.util.encoder import encode_string
 
 dir = ""
@@ -89,23 +89,35 @@ def read_file():
                     case OP_CODE.AUX:
                         key = read_string(file)
                         val = read_string(file)
+
                     case OP_CODE.SELECTDB:
                         current_db = read_unsigned_char(file)
                         databases[current_db] = {}
+
                     case OP_CODE.RESIZEDB:
                         hash_table_len = read_unsigned_char(file)
                         expire_table_len = read_unsigned_char(file)
-                    case OP_CODE.EXPIRETIME:
-                        raise NotImplementedError()
-                    case OP_CODE.EXPIRETIMEMS:
-                        raise NotImplementedError()
+
                     case OP_CODE.EOF:
                         # cheksum
                         checksum = read_unsigned_long(file)
                         break
+
+                    case OP_CODE.EXPIRETIME:
+                        expire_seconds = unsigned_int(file)
+                        value_type = read_unsigned_char(file)
+                        key, value = read_key_value(value_type, file)
+
+                        databases[current_db][key] = (value, expire_seconds)
+                    case OP_CODE.EXPIRETIMEMS:
+                        expire_millis = read_unsigned_long(file)
+                        value_type = read_unsigned_char(file)
+                        key, value = read_key_value(value_type, file)
+
+                        databases[current_db][key] = (value, expire_millis / 1000)
                     case value_type:
                         key, value = read_key_value(value_type, file)
-                        databases[current_db][key] = value
+                        databases[current_db][key] = (value, -1)
 
         print(f"loaded DBs from {dbfilename}")
         print(databases)

@@ -17,21 +17,17 @@ class Storage:
     def set_with_ttl(self, key, value, ttl):
         self.storage[key] = (
             value,
-            (datetime.now().utcnow() + timedelta(milliseconds=ttl)).isoformat(
-                sep=" ", timespec="milliseconds"
-            ),
+            (datetime.now() + timedelta(milliseconds=ttl)).timestamp(),
         )
 
     def get(self, key):
         if key in self.storage:
+            print(str(self.storage))
             entry = self.storage[key]
-            if type(entry) is not tuple:
-                entry = (entry, -1)
 
             if entry[1] != -1:
-                current = datetime.now().utcnow()
-                saved = datetime.fromisoformat(entry[1])
-                if saved < current:
+                current = datetime.now().timestamp()
+                if entry[1] < current:
                     del self.storage[key]
                 else:
                     return entry[0]
