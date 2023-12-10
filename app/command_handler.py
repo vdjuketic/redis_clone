@@ -2,42 +2,45 @@ from app.storage import Storage
 import app.persistence as persistence
 from app.util.encoder import encode_list
 
-storage = Storage()
 
+class CommandHandler:
+    def __init__(self, persistence_enabled):
+        self.storage = Storage()
+        if persistence_enabled:
+            self.storage.load_from_db_file()
 
-def handle_set_command(key, value, ttl=None):
-    if ttl:
-        storage.set_with_ttl(key, value, ttl)
-        return b"+OK\r\n"
-    else:
-        storage.set(key, value)
-        return b"+OK\r\n"
-
-
-def handle_get_command(key):
-    value = storage.get(key)
-    if value:
-        return b"+" + value + b"\r\n"
-    else:
-        return b"$-1\r\n"
-
-
-def handle_config_command(command, key):
-    if command.lower() == b"get":
-        if key.lower() == b"dir":
-            return f"*2\r\n$3\r\ndir\r\n${len(persistence.dir)}\r\n{persistence.dir}\r\n".encode()
-        elif key.lower() == b"dbfilename":
-            return f"*2\r\n$3\r\ndir\r\n${len(persistence.dbfilename)}\r\n{persistence.dbfilename}\r\n".encode()
+    def handle_set_command(self, key, value, ttl=None):
+        key = key.decode()
+        value = value.decode()
+        if ttl:
+            self.storage.set_with_ttl(key, value, ttl)
+            return "+OK\r\n"
         else:
-            return b"+ERR\r\n"
+            self.storage.set(key, value)
+            return "+OK\r\n"
 
+    def handle_get_command(self, key):
+        value = self.storage.get(key.decode())
+        if value:
+            return f"+{value}\r\n"
+        else:
+            return "$-1\r\n"
 
-def handle_keys_command():
-    databases = persistence.read_file()
+    def handle_config_command(self, command, key):
+        if command.lower() == b"get":
+            if key.lower() == b"dir":
+                return f"*2\r\n$3\r\ndir\r\n${len(persistence.dir)}\r\n{persistence.dir}\r\n".encode()
+            elif key.lower() == b"dbfilename":
+                return f"*2\r\n$3\r\ndir\r\n${len(persistence.dbfilename)}\r\n{persistence.dbfilename}\r\n".encode()
+            else:
+                return b"+ERR\r\n"
 
-    keys = []
-    for db_name, data in databases.items():
-        for key in data.keys():
-            keys.append(key)
+    def handle_keys_command(self):
+        databases = persistence.read_file()
 
-    return f"*{encode_list(keys)}".encode()
+        keys = []
+        for db_name, data in databases.items():
+            for key in data.keys():
+                keys.append(key)
+
+        return f"*{encode_list(keys)}".encode()

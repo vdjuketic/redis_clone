@@ -2,11 +2,12 @@ import struct
 from enum import Enum
 from pathlib import Path
 
-from app.util.decoder import decode_string_from_file, read_length_encoding, read_string
+from app.util.decoder import read_length_encoding, read_string
 from app.util.encoder import encode_string
 
 dir = ""
 dbfilename = ""
+enabled = False
 
 
 class OP_CODE:
@@ -71,8 +72,11 @@ def save_file(storage):
 
 def read_file():
     databases = {}
-    # TODO replace with dbfilename
-    with open(Path(dir + "/" + dbfilename), "rb") as file:
+    db_file = Path(dir + "/" + dbfilename)
+    if not db_file.is_file():
+        return None
+
+    with open(db_file, "rb") as file:
         assert file.read(5) == b"REDIS"
         version = file.read(4)
 
@@ -102,6 +106,8 @@ def read_file():
                     key, value = read_key_value(value_type, file)
                     databases[current_db][key] = value
 
+    print(f"loaded DBs from {dbfilename}")
+    print(databases)
     return databases
 
 
